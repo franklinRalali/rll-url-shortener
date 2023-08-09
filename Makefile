@@ -32,4 +32,15 @@ coverage:
 
 start:
 	@go run main.go serve-http
-	
+
+db.migrate.create:
+	@go run main.go db:migrate create $(name) sql
+
+db.migrate.up:
+	@go run main.go db:migrate up
+
+docker.compose.up:
+	docker-compose -f deployment/docker-compose.yaml --project-directory . up -d --build
+
+docker.compose.down:
+	docker-compose -f deployment/docker-compose.yaml --project-directory . down 
