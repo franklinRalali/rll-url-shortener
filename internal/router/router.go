@@ -20,10 +20,6 @@ import (
 	"github.com/ralali/rll-url-shortener/pkg/logger"
 	"github.com/ralali/rll-url-shortener/pkg/routerkit"
 
-	//"github.com/ralali/rll-url-shortener/pkg/mariadb"
-	//"github.com/ralali/rll-url-shortener/internal/repositories"
-	//"github.com/ralali/rll-url-shortener/internal/ucase/example"
-
 	ucaseContract "github.com/ralali/rll-url-shortener/internal/ucase/contract"
 	urlshorteneruc "github.com/ralali/rll-url-shortener/internal/ucase/url_shortener"
 )
