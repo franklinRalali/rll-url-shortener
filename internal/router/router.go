@@ -126,7 +126,6 @@ func (rtr *router) Route() *routerkit.Router {
 
 	root := rtr.router.PathPrefix("/").Subrouter()
 	in := root.PathPrefix("/in/").Subrouter()
-	//inV1 := in.PathPrefix("/v1/").Subrouter()
 
 	// open tracer setup
 	bootstrap.RegistryOpenTracing(rtr.config)
@@ -176,31 +175,6 @@ func (rtr *router) Route() *routerkit.Router {
 		handler.HttpRequest,
 		deleteShortUrl,
 	)).Methods(http.MethodDelete)
-
-	// this is use case for example purpose, please delete
-	//repoExample := repositories.NewExample(db)
-	//el := example.NewExampleList(repoExample)
-	//ec := example.NewPartnerCreate(repoExample)
-	//ed := example.NewExampleDelete(repoExample)
-
-	// TODO: create your route here
-
-	// this route for example rest, please delete
-	// example list
-	//inV1.HandleFunc("/example", rtr.handle(
-	//    handler.HttpRequest,
-	//    el,
-	//)).Methods(http.MethodGet)
-
-	//inV1.HandleFunc("/example", rtr.handle(
-	//    handler.HttpRequest,
-	//    ec,
-	//)).Methods(http.MethodPost)
-
-	//inV1.HandleFunc("/example/{id:[0-9]+}", rtr.handle(
-	//    handler.HttpRequest,
-	//    ed,
-	//)).Methods(http.MethodDelete)
 
 	return rtr.router
 
