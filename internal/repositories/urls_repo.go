@@ -31,3 +31,11 @@ func (r *urls) Upsert(ctx context.Context, url entity.URL) (uint64, error) {
 
 	return uint64(lastId), nil
 }
+
+func (r *urls) FindOneOriginURLByShortCode(ctx context.Context, shortCode string) (string, error) {
+	q := `SELECT origin_url FROM urls WHERE short_code = ?`
+	var originUrl string
+	err := r.db.FetchRow(ctx, &originUrl, q, shortCode)
+
+	return originUrl, err
+}

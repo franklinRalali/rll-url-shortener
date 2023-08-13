@@ -2,26 +2,30 @@
 package router
 
 import (
-    "context"
+	"context"
 	"encoding/json"
 	"net/http"
 	"runtime/debug"
 	"time"
 
 	"github.com/ralali/rll-url-shortener/internal/appctx"
-    "github.com/ralali/rll-url-shortener/internal/bootstrap"
-    "github.com/ralali/rll-url-shortener/internal/consts"
-    "github.com/ralali/rll-url-shortener/internal/handler"
-    "github.com/ralali/rll-url-shortener/internal/middleware"
-    "github.com/ralali/rll-url-shortener/internal/ucase"
-    "github.com/ralali/rll-url-shortener/pkg/logger"
-    "github.com/ralali/rll-url-shortener/pkg/routerkit"
+	"github.com/ralali/rll-url-shortener/internal/bootstrap"
+	"github.com/ralali/rll-url-shortener/internal/consts"
+	"github.com/ralali/rll-url-shortener/internal/handler"
+	"github.com/ralali/rll-url-shortener/internal/middleware"
+	"github.com/ralali/rll-url-shortener/internal/repositories"
+	urlshortenersvc "github.com/ralali/rll-url-shortener/internal/service/url_shortener"
+	"github.com/ralali/rll-url-shortener/internal/ucase"
+	"github.com/ralali/rll-url-shortener/pkg/cache"
+	"github.com/ralali/rll-url-shortener/pkg/logger"
+	"github.com/ralali/rll-url-shortener/pkg/routerkit"
 
-    //"github.com/ralali/rll-url-shortener/pkg/mariadb"
-    //"github.com/ralali/rll-url-shortener/internal/repositories"
-    //"github.com/ralali/rll-url-shortener/internal/ucase/example"
+	//"github.com/ralali/rll-url-shortener/pkg/mariadb"
+	//"github.com/ralali/rll-url-shortener/internal/repositories"
+	//"github.com/ralali/rll-url-shortener/internal/ucase/example"
 
-    ucaseContract "github.com/ralali/rll-url-shortener/internal/ucase/contract"
+	ucaseContract "github.com/ralali/rll-url-shortener/internal/ucase/contract"
+	urlshorteneruc "github.com/ralali/rll-url-shortener/internal/ucase/url_shortener"
 )
 
 type router struct {
@@ -124,19 +128,39 @@ func (rtr *router) Route() *routerkit.Router {
 	in := root.PathPrefix("/in/").Subrouter()
 	//inV1 := in.PathPrefix("/v1/").Subrouter()
 
-    // open tracer setup
-    bootstrap.RegistryOpenTracing(rtr.config)
+	// open tracer setup
+	bootstrap.RegistryOpenTracing(rtr.config)
 
-	// db := bootstrap.RegistryMariaMasterSlave(rtr.config.WriteDB, rtr.config.ReadDB)
+	db := bootstrap.RegistryMariaMasterSlave(rtr.config.WriteDB, rtr.config.ReadDB, time.Local.String())
+	cacher := cache.NewCache(bootstrap.RegistryRedisNative(rtr.config))
 
+	// repositories
+	urlsRepo := repositories.NewUrls(db)
+
+	// services
+	urlShortSvc := urlshortenersvc.NewURLShortener(urlsRepo, cacher, *rtr.config)
 
 	// use case
 	healthy := ucase.NewHealthCheck()
+	createShortUrl := urlshorteneruc.NewCreateShortURL(urlShortSvc)
+	getShortUrl := urlshorteneruc.NewGetShortURL(urlShortSvc)
 
 	// healthy
 	in.HandleFunc("/health", rtr.handle(
 		handler.HttpRequest,
 		healthy,
+	)).Methods(http.MethodGet)
+
+	// create shorten url
+	in.HandleFunc("/{url}", rtr.handle(
+		handler.HttpRequest,
+		createShortUrl,
+	)).Methods(http.MethodPost)
+
+	// get short url
+	in.HandleFunc("/{short_code}", rtr.handle(
+		handler.HttpRequest,
+		getShortUrl,
 	)).Methods(http.MethodGet)
 
 	// this is use case for example purpose, please delete

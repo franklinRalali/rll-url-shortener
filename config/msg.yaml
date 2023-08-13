@@ -31,6 +31,22 @@ messages:
       - lang: en
         text: Transaction pending.
 
+  - name: INVALID_URL
+    code: 400
+    contents:
+      - lang: id
+        text: URL tidak valid
+      - lang: en
+        text: URL is not valid
+
+  - name: SHORT_URL_NOT_FOUND
+    code: 404
+    contents:
+      - lang: id
+        text: URL pendek tidak ditemukan
+      - lang: en
+        text: Short URL not found
+
   - name: AUTHENTICATION_FAILURE
     code: 401
     contents:

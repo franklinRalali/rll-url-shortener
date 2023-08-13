@@ -44,3 +44,6 @@ docker.compose.up:
 
 docker.compose.down:
 	docker-compose -f deployment/docker-compose.yaml --project-directory . down 
+
+app.serve.http:
+	./rll-url-shortener serve-http

@@ -92,4 +92,7 @@ const (
 
 	// ResponseRequestTimeout response var
 	ResponseRequestTimeout = `REQUEST_TIMEOUT`
+
+	ResponseInvalidURL       = `INVALID_URL`
+	ResponseShortURLNotFound = `SHORT_URL_NOT_FOUND`
 )

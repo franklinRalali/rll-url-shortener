@@ -12,4 +12,5 @@ const (
 
 type URLs interface {
 	Upsert(ctx context.Context, url entity.URL) (uint64, error)
+	FindOneOriginURLByShortCode(ctx context.Context, shortCode string) (string, error)
 }
