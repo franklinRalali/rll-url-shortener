@@ -14,3 +14,7 @@ type ShortURLRes struct {
 	OriginURL string `json:"origin_url"`
 	ShortURL  string `json:"short_url"`
 }
+
+type ShortURLUpdateReq struct {
+	OriginURL string `json:"origin_url"`
+}

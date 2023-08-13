@@ -39,3 +39,10 @@ func (r *urls) FindOneOriginURLByShortCode(ctx context.Context, shortCode string
 
 	return originUrl, err
 }
+
+func (r *urls) UpdateByShortCode(ctx context.Context, shortCode string, url entity.URL) error {
+	q := `UPDATE urls SET origin_url = ? WHERE short_code = ?`
+	_, err := r.db.Exec(ctx, q, url.URL, shortCode)
+
+	return err
+}

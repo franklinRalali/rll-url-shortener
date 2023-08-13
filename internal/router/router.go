@@ -144,6 +144,7 @@ func (rtr *router) Route() *routerkit.Router {
 	healthy := ucase.NewHealthCheck()
 	createShortUrl := urlshorteneruc.NewCreateShortURL(urlShortSvc)
 	getShortUrl := urlshorteneruc.NewGetShortURL(urlShortSvc)
+	updateShortUrl := urlshorteneruc.NewUpdateShortURL(urlShortSvc)
 
 	// healthy
 	in.HandleFunc("/health", rtr.handle(
@@ -162,6 +163,12 @@ func (rtr *router) Route() *routerkit.Router {
 		handler.HttpRequest,
 		getShortUrl,
 	)).Methods(http.MethodGet)
+
+	// update short url
+	in.HandleFunc("/{short_code}", rtr.handle(
+		handler.HttpRequest,
+		updateShortUrl,
+	)).Methods(http.MethodPut)
 
 	// this is use case for example purpose, please delete
 	//repoExample := repositories.NewExample(db)

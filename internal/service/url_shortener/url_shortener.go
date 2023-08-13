@@ -2,6 +2,8 @@ package urlshortener
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -20,6 +22,18 @@ const (
 var (
 	originUrlCacheTimeout = 5 * time.Minute
 )
+
+var (
+	errShortUrlNotFound = errors.New("short url not found")
+)
+
+type ErrorShortURLNotFound struct {
+	ShortCode string
+}
+
+func (errNotFound ErrorShortURLNotFound) Error() string {
+	return fmt.Sprintf("short URL with short code %s is not found", errNotFound.ShortCode)
+}
 
 type urlShortener struct {
 	urlsRepo repositories.URLs
@@ -102,4 +116,32 @@ func (u *urlShortener) GetShortURL(ctx context.Context, shortCode string) (Short
 	err = u.cacher.Set(ctx, fmt.Sprintf(originUrlCacheKeyF, shortCode), originUrl, originUrlCacheTimeout)
 
 	return res, err
+}
+
+func (u *urlShortener) UpdateShortURL(ctx context.Context, shortCode string, req ShortURLUpdateReq) error {
+	// check if url with short code is exist
+	_, err := u.urlsRepo.FindOneOriginURLByShortCode(ctx, shortCode)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrorShortURLNotFound{ShortCode: shortCode}
+		}
+
+		return err
+	}
+
+	url := entity.URL{
+		URL: req.OriginURL,
+	}
+
+	if err := u.urlsRepo.UpdateByShortCode(ctx, shortCode, url); err != nil {
+		return err
+	}
+
+	// update the short url on cache too
+	err = u.cacher.Set(ctx, fmt.Sprintf(originUrlCacheKeyF, shortCode), req.OriginURL, originUrlCacheTimeout)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
