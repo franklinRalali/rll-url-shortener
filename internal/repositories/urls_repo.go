@@ -53,3 +53,18 @@ func (r *urls) DeleteByShortCode(ctx context.Context, shortCode string) error {
 
 	return err
 }
+
+func (r *urls) AddVisitCountByShortCode(ctx context.Context, shortCode string, count uint) error {
+	q := `UPDATE urls SET visit_count = visit_count+1 WHERE short_code = ?`
+	_, err := r.db.Exec(ctx, q, count, shortCode)
+
+	return err
+}
+
+func (r *urls) FindOneVisitCountByShortCode(ctx context.Context, shortCode string) (uint64, error) {
+	q := `SELECT visit_count FROM urls WHERE short_code = ?`
+	var visitCount uint64
+	err := r.db.FetchRow(ctx, &visitCount, q, shortCode)
+	
+	return visitCount, err
+}

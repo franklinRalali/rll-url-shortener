@@ -145,6 +145,7 @@ func (rtr *router) Route() *routerkit.Router {
 	getShortUrl := urlshorteneruc.NewGetShortURL(urlShortSvc)
 	updateShortUrl := urlshorteneruc.NewUpdateShortURL(urlShortSvc)
 	deleteShortUrl := urlshorteneruc.NewDeleteShortURL(urlShortSvc)
+	getShortUrlStats := urlshorteneruc.NewGetVisitCount(urlShortSvc)
 
 	// healthy
 	in.HandleFunc("/health", rtr.handle(
@@ -175,6 +176,12 @@ func (rtr *router) Route() *routerkit.Router {
 		handler.HttpRequest,
 		deleteShortUrl,
 	)).Methods(http.MethodDelete)
+
+	// get short url statistics
+	in.HandleFunc("/{short_code}/stats", rtr.handle(
+		handler.HttpRequest,
+		getShortUrlStats,
+	)).Methods(http.MethodGet)
 
 	return rtr.router
 

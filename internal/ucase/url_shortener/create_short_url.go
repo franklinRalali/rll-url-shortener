@@ -39,8 +39,18 @@ func (c *createShortUrl) Serve(data *appctx.Data) (response appctx.Response) {
 		logger.Any("origin_url", originUrl),
 	)
 
+	// decode the url as the url
+	// is url encoded
+	originUrl, err := url.QueryUnescape(originUrl)
+	if err != nil {
+		response.SetName(consts.ResponseInvalidURL)
+		response.SetError(err)
+		
+		return response
+	}
+
 	// validate url to shorten
-	_, err := url.ParseRequestURI(originUrl)
+	_, err = url.ParseRequestURI(originUrl)
 	if err != nil {
 		tracer.SpanError(ctx, err)
 		logger.ErrorWithContext(ctx, logger.SetMessageFormat(logF, err.Error()), fl...)

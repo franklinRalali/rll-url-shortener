@@ -15,4 +15,6 @@ type URLs interface {
 	FindOneOriginURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	UpdateByShortCode(ctx context.Context, shortCode string, url entity.URL) error
 	DeleteByShortCode(ctx context.Context, shortCode string) error
+	AddVisitCountByShortCode(ctx context.Context, shortCode string, count uint) error
+	FindOneVisitCountByShortCode(ctx context.Context, shortCode string) (uint64, error)
 }

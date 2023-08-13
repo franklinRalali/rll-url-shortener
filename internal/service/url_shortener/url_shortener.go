@@ -11,7 +11,6 @@ import (
 	"github.com/ralali/rll-url-shortener/internal/entity"
 	"github.com/ralali/rll-url-shortener/internal/repositories"
 	"github.com/ralali/rll-url-shortener/pkg/cache"
-	"github.com/ralali/rll-url-shortener/pkg/logger"
 	"github.com/ralali/rll-url-shortener/pkg/rands"
 )
 
@@ -51,16 +50,10 @@ func NewURLShortener(urlsRepo repositories.URLs, cacher cache.Cacher, conf appct
 
 func (u *urlShortener) ShortenURL(ctx context.Context, req ShortenURLReq) (ShortenURLRes, error) {
 	var res ShortenURLRes
-	var lf []logger.Field
-	lf = append(
-		lf,
-		logger.Any("user_id", req.UserID),
-		logger.Any("origin_url", req.OriginURL),
-	)
 
 	shortCode, err := rands.RandString(8)
 	if err != nil {
-		logger.ErrorWithContext(ctx, nil, lf...)
+		return res, err
 	}
 
 	url := entity.URL{
@@ -71,7 +64,7 @@ func (u *urlShortener) ShortenURL(ctx context.Context, req ShortenURLReq) (Short
 
 	lastId, err := u.urlsRepo.Upsert(ctx, url)
 	if err != nil {
-		return res, nil
+		return res, err
 	}
 
 	err = u.cacher.Set(ctx, fmt.Sprintf(originUrlCacheKeyF, shortCode), req.OriginURL, originUrlCacheTimeout)
@@ -165,4 +158,20 @@ func (u *urlShortener) DeleteShortURLByShortCode(ctx context.Context, shortCode 
 	err = u.cacher.Delete(ctx, fmt.Sprintf(originUrlCacheKeyF, shortCode))
 
 	return err
+}
+
+func (u *urlShortener) GetShortURLStats(ctx context.Context, shortCode string) (StatisticsRes, error) {
+	var res StatisticsRes
+	visCount, err := u.urlsRepo.FindOneVisitCountByShortCode(ctx, shortCode)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return res, ErrorShortURLNotFound{ShortCode: shortCode}
+		}
+
+		return res, err
+	}
+
+	res.VisitCount = visCount
+
+	return res, nil
 }
