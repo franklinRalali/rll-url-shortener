@@ -94,19 +94,16 @@ func (d *mariaMasterSlave) Ping(ctx context.Context) error {
 func (d *mariaMasterSlave) HealthCheck() error {
 	var err1, err2 error
 	wg := sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
 		err1 = d.Ping(context.Background())
 		wg.Done()
 	}()
 
-	if d.dbRead.PingContext!= nil  {
-        wg.Add(1)
-        go func() {
-            err2 = d.dbRead.PingContext(context.Background())
-            wg.Done()
-        }()
-   }
+	go func() {
+		err2 = d.dbRead.PingContext(context.Background())
+		wg.Done()
+	}()
 
 	wg.Wait()
 
