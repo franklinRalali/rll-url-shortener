@@ -145,6 +145,7 @@ func (rtr *router) Route() *routerkit.Router {
 	createShortUrl := urlshorteneruc.NewCreateShortURL(urlShortSvc)
 	getShortUrl := urlshorteneruc.NewGetShortURL(urlShortSvc)
 	updateShortUrl := urlshorteneruc.NewUpdateShortURL(urlShortSvc)
+	deleteShortUrl := urlshorteneruc.NewDeleteShortURL(urlShortSvc)
 
 	// healthy
 	in.HandleFunc("/health", rtr.handle(
@@ -169,6 +170,12 @@ func (rtr *router) Route() *routerkit.Router {
 		handler.HttpRequest,
 		updateShortUrl,
 	)).Methods(http.MethodPut)
+
+	// delete short url
+	in.HandleFunc("/{short_code}", rtr.handle(
+		handler.HttpRequest,
+		deleteShortUrl,
+	)).Methods(http.MethodDelete)
 
 	// this is use case for example purpose, please delete
 	//repoExample := repositories.NewExample(db)

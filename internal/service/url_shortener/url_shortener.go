@@ -145,3 +145,24 @@ func (u *urlShortener) UpdateShortURL(ctx context.Context, shortCode string, req
 
 	return nil
 }
+
+func (u *urlShortener) DeleteShortURLByShortCode(ctx context.Context, shortCode string) error {
+	// check if short url exist
+	_, err := u.urlsRepo.FindOneOriginURLByShortCode(ctx, shortCode)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrorShortURLNotFound{ShortCode: shortCode}
+		}
+
+		return err
+	}
+
+	if err = u.urlsRepo.DeleteByShortCode(ctx, shortCode); err != nil {
+		return nil
+	}
+
+	// delete the origin url from cache
+	err = u.cacher.Delete(ctx, fmt.Sprintf(originUrlCacheKeyF, shortCode))
+
+	return err
+}

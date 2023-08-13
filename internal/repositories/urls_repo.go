@@ -46,3 +46,10 @@ func (r *urls) UpdateByShortCode(ctx context.Context, shortCode string, url enti
 
 	return err
 }
+
+func (r *urls) DeleteByShortCode(ctx context.Context, shortCode string) error {
+	q := `DELETE FROM urls WHERE short_code = ?`
+	_, err := r.db.Exec(ctx, q, shortCode)
+
+	return err
+}
