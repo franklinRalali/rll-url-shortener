@@ -47,6 +47,14 @@ func (g *getShortUrl) Serve(data *appctx.Data) (response appctx.Response) {
 		return response
 	}
 
+	// add visit count
+	if err := g.shortUrlSvc.AddVisitCount(ctx, shortCode); err != nil {
+		logger.ErrorWithContext(ctx, logger.SetMessageFormat(logF, err.Error()), lf...)
+		response.SetName(consts.ResponseInternalFailure)
+		response.SetError(err)
+		return response
+	}
+
 	response.SetName(consts.ResponseSuccess)
 	response.SetData(res)
 

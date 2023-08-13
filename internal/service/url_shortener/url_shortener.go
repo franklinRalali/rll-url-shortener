@@ -175,3 +175,8 @@ func (u *urlShortener) GetShortURLStats(ctx context.Context, shortCode string) (
 
 	return res, nil
 }
+
+func (u *urlShortener) AddVisitCount(ctx context.Context, shortCode string) error {
+	err := u.urlsRepo.AddVisitCountByShortCode(ctx, shortCode, 1)
+	return err
+}

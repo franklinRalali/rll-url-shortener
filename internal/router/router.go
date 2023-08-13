@@ -161,6 +161,13 @@ func (rtr *router) Route() *routerkit.Router {
 		getShortUrl,
 	)).Methods(http.MethodGet)
 
+	// this is a special handler, where we need http.ResponseWriter
+	// to redirect to the origin url of this shorten url
+	in.HandleFunc("/{short_code}", rtr.handle(
+		handler.HttpRequest,
+		getShortUrl,
+	)).Methods(http.MethodGet)
+
 	// update short url
 	in.HandleFunc("/{short_code}", rtr.handle(
 		handler.HttpRequest,
