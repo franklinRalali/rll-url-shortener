@@ -23,7 +23,7 @@ func NewGetShortURL(shortUrlSvc urlshortener.URLShortener) contract.UseCase {
 func (g *getShortUrl) Serve(data *appctx.Data) (response appctx.Response) {
 	// TODO
 	// this can possibly moved to consts
-	logF := "[createShortUrl.Serve] %s"
+	logF := "[getShortUrl.Serve] %s"
 
 	var (
 		ctx       = tracer.SpanStartUseCase(data.Request.Context(), "Serve")
