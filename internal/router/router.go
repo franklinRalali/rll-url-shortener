@@ -18,6 +18,7 @@ import (
 	"github.com/ralali/rll-url-shortener/internal/ucase"
 	"github.com/ralali/rll-url-shortener/pkg/cache"
 	"github.com/ralali/rll-url-shortener/pkg/logger"
+	"github.com/ralali/rll-url-shortener/pkg/rands"
 	"github.com/ralali/rll-url-shortener/pkg/routerkit"
 
 	ucaseContract "github.com/ralali/rll-url-shortener/internal/ucase/contract"
@@ -129,11 +130,14 @@ func (rtr *router) Route() *routerkit.Router {
 	db := bootstrap.RegistryMariaMasterSlave(rtr.config.WriteDB, rtr.config.ReadDB, time.Local.String())
 	cacher := cache.NewCache(bootstrap.RegistryRedisNative(rtr.config))
 
+	// random generator
+	randGen := rands.New(rands.DefaultSource)
+
 	// repositories
 	urlsRepo := repositories.NewUrls(db)
 
 	// services
-	urlShortSvc := urlshortenersvc.NewURLShortener(urlsRepo, cacher, *rtr.config)
+	urlShortSvc := urlshortenersvc.NewURLShortener(urlsRepo, cacher, *rtr.config, randGen)
 
 	// use case
 	healthy := ucase.NewHealthCheck()

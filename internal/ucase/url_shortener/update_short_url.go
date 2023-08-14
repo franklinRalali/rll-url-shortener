@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/ralali/rll-url-shortener/internal/appctx"
 	"github.com/ralali/rll-url-shortener/internal/consts"
+	"github.com/ralali/rll-url-shortener/internal/presentations"
 	urlshortener "github.com/ralali/rll-url-shortener/internal/service/url_shortener"
 	"github.com/ralali/rll-url-shortener/internal/ucase/contract"
 	"github.com/ralali/rll-url-shortener/pkg/logger"
@@ -26,7 +27,7 @@ func (u *updateShortUrl) Serve(data *appctx.Data) (response appctx.Response) {
 	var (
 		ctx       = tracer.SpanStartUseCase(data.Request.Context(), "Serve")
 		shortCode = mux.Vars(data.Request)["short_code"]
-		req       urlshortener.ShortURLUpdateReq
+		req       presentations.ShortURLUpdateReq
 	)
 
 	if err := data.Cast(&req); err != nil {

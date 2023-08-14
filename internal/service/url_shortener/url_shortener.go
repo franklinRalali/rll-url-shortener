@@ -3,12 +3,12 @@ package urlshortener
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/ralali/rll-url-shortener/internal/appctx"
 	"github.com/ralali/rll-url-shortener/internal/entity"
+	"github.com/ralali/rll-url-shortener/internal/presentations"
 	"github.com/ralali/rll-url-shortener/internal/repositories"
 	"github.com/ralali/rll-url-shortener/pkg/cache"
 	"github.com/ralali/rll-url-shortener/pkg/rands"
@@ -20,10 +20,6 @@ const (
 
 var (
 	originUrlCacheTimeout = 5 * time.Minute
-)
-
-var (
-	errShortUrlNotFound = errors.New("short url not found")
 )
 
 type ErrorShortURLNotFound struct {
@@ -38,20 +34,27 @@ type urlShortener struct {
 	urlsRepo repositories.URLs
 	cacher   cache.Cacher
 	conf     appctx.Config
+	randGen  rands.Randoms
 }
 
-func NewURLShortener(urlsRepo repositories.URLs, cacher cache.Cacher, conf appctx.Config) URLShortener {
+func NewURLShortener(
+	urlsRepo repositories.URLs,
+	cacher cache.Cacher,
+	conf appctx.Config,
+	randGen rands.Randoms,
+) URLShortener {
 	return &urlShortener{
 		urlsRepo: urlsRepo,
 		cacher:   cacher,
 		conf:     conf,
+		randGen:  randGen,
 	}
 }
 
-func (u *urlShortener) ShortenURL(ctx context.Context, req ShortenURLReq) (ShortenURLRes, error) {
-	var res ShortenURLRes
+func (u *urlShortener) ShortenURL(ctx context.Context, req presentations.ShortenURLReq) (presentations.ShortenURLRes, error) {
+	var res presentations.ShortenURLRes
 
-	shortCode, err := rands.RandString(8)
+	shortCode, err := u.randGen.String(8, rands.DefaultCharSet)
 	if err != nil {
 		return res, err
 	}
@@ -72,7 +75,7 @@ func (u *urlShortener) ShortenURL(ctx context.Context, req ShortenURLReq) (Short
 		return res, err
 	}
 
-	res = ShortenURLRes{
+	res = presentations.ShortenURLRes{
 		ID:        lastId,
 		ShortCode: shortCode,
 	}
@@ -80,8 +83,8 @@ func (u *urlShortener) ShortenURL(ctx context.Context, req ShortenURLReq) (Short
 	return res, nil
 }
 
-func (u *urlShortener) GetShortURL(ctx context.Context, shortCode string) (ShortURLRes, error) {
-	var res ShortURLRes
+func (u *urlShortener) GetShortURL(ctx context.Context, shortCode string) (presentations.ShortURLRes, error) {
+	var res presentations.ShortURLRes
 
 	// find the origin url from cache first
 	cVal, err := u.cacher.Get(ctx, fmt.Sprintf(originUrlCacheKeyF, shortCode))
@@ -111,7 +114,7 @@ func (u *urlShortener) GetShortURL(ctx context.Context, shortCode string) (Short
 	return res, err
 }
 
-func (u *urlShortener) UpdateShortURL(ctx context.Context, shortCode string, req ShortURLUpdateReq) error {
+func (u *urlShortener) UpdateShortURL(ctx context.Context, shortCode string, req presentations.ShortURLUpdateReq) error {
 	// check if url with short code is exist
 	_, err := u.urlsRepo.FindOneOriginURLByShortCode(ctx, shortCode)
 	if err != nil {
@@ -151,7 +154,7 @@ func (u *urlShortener) DeleteShortURLByShortCode(ctx context.Context, shortCode 
 	}
 
 	if err = u.urlsRepo.DeleteByShortCode(ctx, shortCode); err != nil {
-		return nil
+		return err
 	}
 
 	// delete the origin url from cache
@@ -160,8 +163,8 @@ func (u *urlShortener) DeleteShortURLByShortCode(ctx context.Context, shortCode 
 	return err
 }
 
-func (u *urlShortener) GetShortURLStats(ctx context.Context, shortCode string) (StatisticsRes, error) {
-	var res StatisticsRes
+func (u *urlShortener) GetShortURLStats(ctx context.Context, shortCode string) (presentations.StatisticsRes, error) {
+	var res presentations.StatisticsRes
 	visCount, err := u.urlsRepo.FindOneVisitCountByShortCode(ctx, shortCode)
 	if err != nil {
 		if err == sql.ErrNoRows {

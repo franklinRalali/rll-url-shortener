@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/ralali/rll-url-shortener/internal/appctx"
 	"github.com/ralali/rll-url-shortener/internal/consts"
+	"github.com/ralali/rll-url-shortener/internal/presentations"
 	urlshortener "github.com/ralali/rll-url-shortener/internal/service/url_shortener"
 	"github.com/ralali/rll-url-shortener/internal/ucase/contract"
 	"github.com/ralali/rll-url-shortener/pkg/logger"
@@ -61,7 +62,7 @@ func (c *createShortUrl) Serve(data *appctx.Data) (response appctx.Response) {
 		return response
 	}
 
-	req := urlshortener.ShortenURLReq{
+	req := presentations.ShortenURLReq{
 		UserID: userId,
 		OriginURL: originUrl,
 	}
