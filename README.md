@@ -35,7 +35,7 @@ $ docker run -i --name rll-url-shortener -p 8081:8081 -t rll-url-shortener
 Linux or MacOS
 
 ## Installation guide
-#### 1. install go version 1.14.2     
+#### 1. install go version 1.17 or above  
 ```bash
 # please read this link installation guide of go
 # https://golang.org/doc/install
@@ -84,56 +84,57 @@ go build
 {{host}}/in/health
 ```
 
-
-#### Postman Collection
-```go
-```
-
 ### Database Migration
 migration up
 ```bash
-go run main.go db:migrate up
+make db.migrate.up
 ```
 
 migration down
 ```bash
-go run main.go db:migrate down
+make db.migrate.down
 ```
 
 migration reset
 ```bash
-go run main.go db:migrate reset
-```
-
-migration reset
-```bash
-go run main.go db:migrate reset
+make db.migrate.reset
 ```
 
 migration redo
 ```bash
-go run main.go db:migrate redo
+make db.migrate.redo
 ```
 
 migration status
 ```bash
-go run main.go db:migrate status
+make db.migrate.status
 ```
 
 create migration table
 ```bash
-go run main.go db:migrate create {table-name} sql
+make db.migrate.create name={table_name}
 
 # example
-go run main.go db:migrate create users sql
+make db.migrate.create name=user_profiles
 ```
 
 to show all command
 ```bash
-go run main.go db:migrate
+make db.migrate
 ```
 
 ## run docker compose on your local machine
+Up containers
 ```bash
-docker-compose -f deployment/docker-compose.yaml --project-directory . up -d --build
+make docker.compose.up
+```
+
+Shutdown containers
+```bash
+make docker.compose.down
+```
+
+Restart containers
+```bash
+make docker.compose.restart
 ```
