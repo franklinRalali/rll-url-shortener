@@ -164,13 +164,6 @@ func (rtr *router) Route() *routerkit.Router {
 		getShortUrl,
 	)).Methods(http.MethodGet)
 
-	// this is a special handler, where we need http.ResponseWriter
-	// to redirect to the origin url of this shorten url
-	root.HandleFunc("/{short_code}", rtr.handle(
-		handler.HttpRequest,
-		getShortUrl,
-	)).Methods(http.MethodGet)
-
 	// update short url
 	root.HandleFunc("/{short_code}", rtr.handle(
 		handler.HttpRequest,
@@ -187,6 +180,11 @@ func (rtr *router) Route() *routerkit.Router {
 	root.HandleFunc("/{short_code}/stats", rtr.handle(
 		handler.HttpRequest,
 		getShortUrlStats,
+	)).Methods(http.MethodGet)
+
+	root.HandleFunc("/", rtr.handle(
+		handler.HttpRequest,
+		ucase.NewAllEndpoints(),
 	)).Methods(http.MethodGet)
 
 	return rtr.router
