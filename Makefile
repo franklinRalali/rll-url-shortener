@@ -39,11 +39,28 @@ db.migrate.create:
 db.migrate.up:
 	@go run main.go db:migrate up
 
+db.migrate.down:
+	@go run main.go db:migrate down
+
+db.migrate.reset:
+	@go run main.go db:migrate reset
+
+db.migrate.redo:
+	@go run main.go db:migrate redo
+
+db.migrate.status:
+	@go run main.go db:migrate status
+
+db.migrate:
+	@go run main.go db:migrate
+
 docker.compose.up:
 	docker-compose -f deployment/docker-compose.yaml --project-directory . up -d --build
 
 docker.compose.down:
 	docker-compose -f deployment/docker-compose.yaml --project-directory . down 
+
+docker.compose.restart: docker.compose.down docker.compose.up
 
 run.api: build
 	./rll-url-shortener serve-http
