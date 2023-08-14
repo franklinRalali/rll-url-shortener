@@ -74,6 +74,22 @@ services:
        - code-network
      ports:
        - 5601:5601
+  rll-url-shortener:
+    build:
+      context: .
+      dockerfile: deployment/dockerfiles/dockerfile-local
+    working_dir: /go/src/github.com/ralali/rll-url-shortener
+    container_name: rll-url-shortener
+    hostname: rll-url-shortener
+    networks:
+      - code-network
+    volumes:
+      - .:/go/src/github.com/ralali/rll-url-shortener
+    ports:
+      - 8081:8081
+    depends_on:
+      - mariadb
+      - redis
 
 volumes:
   elastic:
