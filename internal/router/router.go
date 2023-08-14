@@ -122,7 +122,6 @@ func (rtr *router) response(w http.ResponseWriter, resp appctx.Response) {
 func (rtr *router) Route() *routerkit.Router {
 
 	root := rtr.router.PathPrefix("/").Subrouter()
-	in := root.PathPrefix("/in/").Subrouter()
 
 	// open tracer setup
 	bootstrap.RegistryOpenTracing(rtr.config)
@@ -148,44 +147,44 @@ func (rtr *router) Route() *routerkit.Router {
 	getShortUrlStats := urlshorteneruc.NewGetVisitCount(urlShortSvc)
 
 	// healthy
-	in.HandleFunc("/health", rtr.handle(
+	root.HandleFunc("/health", rtr.handle(
 		handler.HttpRequest,
 		healthy,
 	)).Methods(http.MethodGet)
 
 	// create shorten url
-	in.HandleFunc("/{url}", rtr.handle(
+	root.HandleFunc("/{url}", rtr.handle(
 		handler.HttpRequest,
 		createShortUrl,
 	)).Methods(http.MethodPost)
 
 	// get short url
-	in.HandleFunc("/{short_code}", rtr.handle(
+	root.HandleFunc("/{short_code}", rtr.handle(
 		handler.HttpRequest,
 		getShortUrl,
 	)).Methods(http.MethodGet)
 
 	// this is a special handler, where we need http.ResponseWriter
 	// to redirect to the origin url of this shorten url
-	in.HandleFunc("/{short_code}", rtr.handle(
+	root.HandleFunc("/{short_code}", rtr.handle(
 		handler.HttpRequest,
 		getShortUrl,
 	)).Methods(http.MethodGet)
 
 	// update short url
-	in.HandleFunc("/{short_code}", rtr.handle(
+	root.HandleFunc("/{short_code}", rtr.handle(
 		handler.HttpRequest,
 		updateShortUrl,
 	)).Methods(http.MethodPut)
 
 	// delete short url
-	in.HandleFunc("/{short_code}", rtr.handle(
+	root.HandleFunc("/{short_code}", rtr.handle(
 		handler.HttpRequest,
 		deleteShortUrl,
 	)).Methods(http.MethodDelete)
 
 	// get short url statistics
-	in.HandleFunc("/{short_code}/stats", rtr.handle(
+	root.HandleFunc("/{short_code}/stats", rtr.handle(
 		handler.HttpRequest,
 		getShortUrlStats,
 	)).Methods(http.MethodGet)
